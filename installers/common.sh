@@ -207,6 +207,7 @@ function default_configuration() {
 
 
 # Add a single entry to the sudoers file
+# FIXME: something wrong here? cmd after space not being written
 function sudo_add() {
     sudo bash -c "echo \"www-data ALL=(ALL) NOPASSWD:$1\" | (EDITOR=\"tee -a\" visudo)" \
         || install_error "Unable to patch /etc/sudoers"
@@ -237,6 +238,7 @@ function patch_system_files() {
         '/bin/cp /etc/raspap/networking/dhcpcd.conf /etc/dhcpcd.conf'
         '/etc/raspap/hostapd/enablelog.sh'
         '/etc/raspap/hostapd/disablelog.sh'
+        '/sbin/iwlist wlan0 scan'
     )
 
     # Check if sudoers needs patchin

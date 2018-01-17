@@ -73,18 +73,6 @@ function config_installation() {
     fi
 }
 
-## Runs a system software update to make sure we're using all fresh packages
-#function update_system_packages() {
-#    # OVERLOAD THIS
-#    install_error "No function definition for update_system_packages"
-#}
-#
-## Installs additional dependencies using system package manager
-#function install_dependencies() {
-#    # OVERLOAD THIS
-#    install_error "No function definition for install_dependencies"
-#}
-
 # Enables PHP for lighttpd and restarts service for settings to take effect
 function enable_php_lighttpd() {
     install_log "Enabling PHP for lighttpd"

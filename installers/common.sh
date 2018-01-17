@@ -19,12 +19,12 @@ fi
 
 function update_system_packages() {
     install_log "Updating sources"
-    sudo apt-get -y update || install_error "Unable to update package list"
+    apt-get -y update || install_error "Unable to update package list"
 }
 
 function install_dependencies() {
     install_log "Installing required packages"
-    sudo apt-get -y install lighttpd $php_package git hostapd dnsmasq || install_error "Unable to install dependencies"
+    apt-get -y install lighttpd $php_package git hostapd dnsmasq || install_error "Unable to install dependencies"
   }
 
 # Outputs a RaspAP Install log line
@@ -77,53 +77,53 @@ function config_installation() {
 function enable_php_lighttpd() {
     install_log "Enabling PHP for lighttpd"
 
-    sudo lighttpd-enable-mod fastcgi-php    
-    #sudo service lighttpd force-reload
-    #sudo /etc/init.d/lighttpd restart || install_error "Unable to restart lighttpd"
+    lighttpd-enable-mod fastcgi-php    
+    #service lighttpd force-reload
+    #/etc/init.d/lighttpd restart || install_error "Unable to restart lighttpd"
 }
 
 # Verifies existence and permissions of RaspAP directory
 function create_raspap_directories() {
     install_log "Creating RaspAP directories"
     if [ -d "$raspap_dir" ]; then
-        sudo mv $raspap_dir "$raspap_dir.`date +%F-%R`" || install_error "Unable to move old '$raspap_dir' out of the way"
+        mv $raspap_dir "$raspap_dir.`date +%F-%R`" || install_error "Unable to move old '$raspap_dir' out of the way"
     fi
-    sudo mkdir -p "$raspap_dir" || install_error "Unable to create directory '$raspap_dir'"
+    mkdir -p "$raspap_dir" || install_error "Unable to create directory '$raspap_dir'"
 
     # Create a directory for existing file backups.
-    sudo mkdir -p "$raspap_dir/backups"
+    mkdir -p "$raspap_dir/backups"
 
     # Create a directory to store networking configs
-    sudo mkdir -p "$raspap_dir/networking"
+    mkdir -p "$raspap_dir/networking"
     # Copy existing dhcpcd.conf to use as base config
-    cat /etc/dhcpcd.conf | sudo tee -a /etc/raspap/networking/defaults
+    cat /etc/dhcpcd.conf | tee -a /etc/raspap/networking/defaults
 
-    sudo chown -R $raspap_user:$raspap_user "$raspap_dir" || install_error "Unable to change file ownership for '$raspap_dir'"
+    chown -R $raspap_user:$raspap_user "$raspap_dir" || install_error "Unable to change file ownership for '$raspap_dir'"
 }
 
 # Generate logging enable/disable files for hostapd
 function create_logging_scripts() {
     install_log "Creating logging scripts"
-    sudo mkdir $raspap_dir/hostapd || install_error "Unable to create directory '$raspap_dir/hostapd'"
+    mkdir $raspap_dir/hostapd || install_error "Unable to create directory '$raspap_dir/hostapd'"
 
     # Move existing shell scripts 
-    sudo mv $webroot_dir/installers/*log.sh $raspap_dir/hostapd || install_error "Unable to move logging scripts"
+    mv $webroot_dir/installers/*log.sh $raspap_dir/hostapd || install_error "Unable to move logging scripts"
 }
 
 # Generate logging enable/disable files for hostapd
 function create_logging_scripts() {
-    sudo mkdir /etc/raspap/hostapd
-    sudo mv /var/www/html/installers/*log.sh /etc/raspap/hostapd
+    mkdir /etc/raspap/hostapd
+    mv /var/www/html/installers/*log.sh /etc/raspap/hostapd
 }
 
 # Fetches latest files from github to webroot
 function download_latest_files() {
     if [ -d "$webroot_dir" ]; then
-        sudo mv $webroot_dir "$webroot_dir.`date +%F-%R`" || install_error "Unable to remove old webroot directory"
+        mv $webroot_dir "$webroot_dir.`date +%F-%R`" || install_error "Unable to remove old webroot directory"
     fi
 
     install_log "Copying files to web server directory"
-    sudo cp -r ../ $webroot_dir || install_error "Unable to copy raspap-webgui to web root"
+    cp -r ../ $webroot_dir || install_error "Unable to copy raspap-webgui to web root"
 }
 
 # Sets files ownership in web root directory
@@ -133,34 +133,34 @@ function change_file_ownership() {
     fi
 
     install_log "Changing file ownership in web root directory"
-    sudo chown -R $raspap_user:$raspap_user "$webroot_dir" || install_error "Unable to change file ownership for '$webroot_dir'"
+    chown -R $raspap_user:$raspap_user "$webroot_dir" || install_error "Unable to change file ownership for '$webroot_dir'"
 }
 
 # Check for existing /etc/network/interfaces and /etc/hostapd/hostapd.conf files
 function check_for_old_configs() {
     if [ -f /etc/network/interfaces ]; then
-        sudo cp /etc/network/interfaces "$raspap_dir/backups/interfaces.`date +%F-%R`"
-        sudo ln -sf "$raspap_dir/backups/interfaces.`date +%F-%R`" "$raspap_dir/backups/interfaces"
+        cp /etc/network/interfaces "$raspap_dir/backups/interfaces.`date +%F-%R`"
+        ln -sf "$raspap_dir/backups/interfaces.`date +%F-%R`" "$raspap_dir/backups/interfaces"
     fi
 
     if [ -f /etc/hostapd/hostapd.conf ]; then
-        sudo cp /etc/hostapd/hostapd.conf "$raspap_dir/backups/hostapd.conf.`date +%F-%R`"
-        sudo ln -sf "$raspap_dir/backups/hostapd.conf.`date +%F-%R`" "$raspap_dir/backups/hostapd.conf"
+        cp /etc/hostapd/hostapd.conf "$raspap_dir/backups/hostapd.conf.`date +%F-%R`"
+        ln -sf "$raspap_dir/backups/hostapd.conf.`date +%F-%R`" "$raspap_dir/backups/hostapd.conf"
     fi
 
     if [ -f /etc/dnsmasq.conf ]; then
-        sudo cp /etc/dnsmasq.conf "$raspap_dir/backups/dnsmasq.conf.`date +%F-%R`"
-        sudo ln -sf "$raspap_dir/backups/dnsmasq.conf.`date +%F-%R`" "$raspap_dir/backups/dnsmasq.conf"
+        cp /etc/dnsmasq.conf "$raspap_dir/backups/dnsmasq.conf.`date +%F-%R`"
+        ln -sf "$raspap_dir/backups/dnsmasq.conf.`date +%F-%R`" "$raspap_dir/backups/dnsmasq.conf"
     fi
 
     if [ -f /etc/dhcpcd.conf ]; then
-        sudo cp /etc/dhcpcd.conf "$raspap_dir/backups/dhcpcd.conf.`date +%F-%R`"
-        sudo ln -sf "$raspap_dir/backups/dhcpcd.conf.`date +%F-%R`" "$raspap_dir/backups/dhcpcd.conf"
+        cp /etc/dhcpcd.conf "$raspap_dir/backups/dhcpcd.conf.`date +%F-%R`"
+        ln -sf "$raspap_dir/backups/dhcpcd.conf.`date +%F-%R`" "$raspap_dir/backups/dhcpcd.conf"
     fi
 
     if [ -f /etc/rc.local ]; then
-        sudo cp /etc/rc.local "$raspap_dir/backups/rc.local.`date +%F-%R`"
-        sudo ln -sf "$raspap_dir/backups/rc.local.`date +%F-%R`" "$raspap_dir/backups/rc.local"
+        cp /etc/rc.local "$raspap_dir/backups/rc.local.`date +%F-%R`"
+        ln -sf "$raspap_dir/backups/rc.local.`date +%F-%R`" "$raspap_dir/backups/rc.local"
     fi
 }
 
@@ -171,20 +171,20 @@ function move_config_file() {
     fi
 
     install_log "Moving configuration file to '$raspap_dir'"
-    sudo mv "$webroot_dir"/raspap.php "$raspap_dir" || install_error "Unable to move files to '$raspap_dir'"
-    sudo chown -R $raspap_user:$raspap_user "$raspap_dir" || install_error "Unable to change file ownership for '$raspap_dir'"
+    mv "$webroot_dir"/raspap.php "$raspap_dir" || install_error "Unable to move files to '$raspap_dir'"
+    chown -R $raspap_user:$raspap_user "$raspap_dir" || install_error "Unable to change file ownership for '$raspap_dir'"
 }
 
 # Set up default configuration
 function default_configuration() {
     install_log "Setting up hostapd"
     if [ -f /etc/default/hostapd ]; then
-        sudo mv /etc/default/hostapd /tmp/default_hostapd.old || install_error "Unable to remove old /etc/default/hostapd file"
+        mv /etc/default/hostapd /tmp/default_hostapd.old || install_error "Unable to remove old /etc/default/hostapd file"
     fi
-    sudo mv $webroot_dir/config/default_hostapd /etc/default/hostapd || install_error "Unable to move hostapd defaults file"
-    sudo mv $webroot_dir/config/hostapd.conf /etc/hostapd/hostapd.conf || install_error "Unable to move hostapd configuration file"
-    sudo mv $webroot_dir/config/dnsmasq.conf /etc/dnsmasq.conf || install_error "Unable to move dnsmasq configuration file"
-    sudo mv $webroot_dir/config/dhcpcd.conf /etc/dhcpcd.conf || install_error "Unable to move dhcpcd configuration file"
+    mv $webroot_dir/config/default_hostapd /etc/default/hostapd || install_error "Unable to move hostapd defaults file"
+    mv $webroot_dir/config/hostapd.conf /etc/hostapd/hostapd.conf || install_error "Unable to move hostapd configuration file"
+    mv $webroot_dir/config/dnsmasq.conf /etc/dnsmasq.conf || install_error "Unable to move dnsmasq configuration file"
+    mv $webroot_dir/config/dhcpcd.conf /etc/dhcpcd.conf || install_error "Unable to move dhcpcd configuration file"
 
     # Generate required lines for Rasp AP to place into rc.local file.
     # #RASPAP is for removal script
@@ -206,7 +206,7 @@ function default_configuration() {
 
 # Add a single entry to the sudoers file
 function sudo_add() {
-    sudo bash -c "echo \"www-data ALL=(ALL) NOPASSWD:$1\" | (EDITOR=\"tee -a\" visudo)" \
+    bash -c "echo \"www-data ALL=(ALL) NOPASSWD:$1\" | (EDITOR=\"tee -a\" visudo)" \
         || install_error "Unable to patch /etc/sudoers"
 }
 
@@ -239,10 +239,10 @@ function patch_system_files() {
     )
 
     # Check if sudoers needs patchin
-    if [ $(sudo grep -c www-data /etc/sudoers) -ne 15 ]; then
+    if [ $(grep -c www-data /etc/sudoers) -ne 15 ]; then
         # Sudoers file has incorrect number of commands. Wiping them out.
         install_log "Cleaning sudoers file"
-        sudo sed -i '/www-data/d' /etc/sudoers
+        sed -i '/www-data/d' /etc/sudoers
         install_log "Patching system sudoers file"
         # patch /etc/sudoers file
         for cmd in "${cmds[@]}"; do
@@ -262,7 +262,7 @@ function install_complete() {
         echo "Installation aborted."
         exit 0
     fi
-    sudo shutdown -r now || install_error "Unable to execute shutdown"
+    shutdown -r now || install_error "Unable to execute shutdown"
 }
 
 function install_raspap() {

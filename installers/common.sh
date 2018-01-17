@@ -19,12 +19,12 @@ fi
 
 function update_system_packages() {
     install_log "Updating sources"
-    sudo apt-get update || install_error "Unable to update package list"
+    sudo apt-get -y update || install_error "Unable to update package list"
 }
 
 function install_dependencies() {
     install_log "Installing required packages"
-    sudo apt-get install lighttpd $php_package git hostapd dnsmasq || install_error "Unable to install dependencies"
+    sudo apt-get -y install lighttpd $php_package git hostapd dnsmasq || install_error "Unable to install dependencies"
   }
 
 # Outputs a RaspAP Install log line
@@ -65,7 +65,8 @@ function config_installation() {
     echo "Install directory: ${raspap_dir}"
     echo "Lighttpd directory: ${webroot_dir}"
     echo -n "Complete installation with these values? [y/N]: "
-    read answer
+    # read answer
+    answer="y"
     if [[ $answer != "y" ]]; then
         echo "Installation aborted."
         exit 0
@@ -216,7 +217,6 @@ function default_configuration() {
 
 
 # Add a single entry to the sudoers file
-# FIXME: something wrong here? cmd after space not being written
 function sudo_add() {
     sudo bash -c "echo \"www-data ALL=(ALL) NOPASSWD:$1\" | (EDITOR=\"tee -a\" visudo)" \
         || install_error "Unable to patch /etc/sudoers"
@@ -291,5 +291,5 @@ function install_raspap() {
     move_config_file
     default_configuration
     patch_system_files
-    install_complete
+    #install_complete
 }

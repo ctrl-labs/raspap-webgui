@@ -134,10 +134,6 @@ function download_latest_files() {
     fi
 
     install_log "Copying files to web server directory"
-    #install_log "Cloning latest files from github"
-    # FIXME: update or remove this step?
-    #git clone https://github.com/billz/raspap-webgui /tmp/raspap-webgui || install_error "Unable to download files from github"
-    #sudo mv /tmp/raspap-webgui $webroot_dir || install_error "Unable to move raspap-webgui to web root"
     sudo cp -r ../ $webroot_dir || install_error "Unable to copy raspap-webgui to web root"
 }
 
@@ -234,6 +230,7 @@ function patch_system_files() {
         '/sbin/ifup wlan0'
         '/bin/cat /etc/wpa_supplicant/wpa_supplicant.conf'
         '/bin/cp /tmp/wifidata /etc/wpa_supplicant/wpa_supplicant.conf'
+        '/sbin/iwlist wlan0 scan'
         '/sbin/wpa_cli scan_results'
         '/sbin/wpa_cli scan'
         '/sbin/wpa_cli reconfigure'
@@ -251,7 +248,6 @@ function patch_system_files() {
         '/bin/cp /etc/raspap/networking/dhcpcd.conf /etc/dhcpcd.conf'
         '/etc/raspap/hostapd/enablelog.sh'
         '/etc/raspap/hostapd/disablelog.sh'
-        '/sbin/iwlist wlan0 scan'
     )
 
     # Check if sudoers needs patchin

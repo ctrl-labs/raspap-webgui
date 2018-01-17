@@ -17,6 +17,16 @@ else
     php_package="php5-cgi" 
 fi 
 
+function update_system_packages() {
+    install_log "Updating sources"
+    sudo apt-get update || install_error "Unable to update package list"
+}
+
+function install_dependencies() {
+    install_log "Installing required packages"
+    sudo apt-get install lighttpd $php_package git hostapd dnsmasq || install_error "Unable to install dependencies"
+  }
+
 # Outputs a RaspAP Install log line
 function install_log() {
     echo -e "\033[1;32mRaspAP Install: $*\033[m"
@@ -123,9 +133,12 @@ function download_latest_files() {
         sudo mv $webroot_dir "$webroot_dir.`date +%F-%R`" || install_error "Unable to remove old webroot directory"
     fi
 
-    install_log "Cloning latest files from github"
-    git clone https://github.com/billz/raspap-webgui /tmp/raspap-webgui || install_error "Unable to download files from github"
-    sudo mv /tmp/raspap-webgui $webroot_dir || install_error "Unable to move raspap-webgui to web root"
+    install_log "Copying files to web server directory"
+    #install_log "Cloning latest files from github"
+    # FIXME: update or remove this step?
+    #git clone https://github.com/billz/raspap-webgui /tmp/raspap-webgui || install_error "Unable to download files from github"
+    #sudo mv /tmp/raspap-webgui $webroot_dir || install_error "Unable to move raspap-webgui to web root"
+    sudo cp -r ../ $webroot_dir || install_error "Unable to copy raspap-webgui to web root"
 }
 
 # Sets files ownership in web root directory

@@ -109,6 +109,8 @@ function DisplayWPAConfig(){
     }
   }
 
+  exec( 'sudo iwlist wlan0 scan' );
+  sleep(5);
   exec( 'sudo wpa_cli scan' );
   sleep(3);
   exec( 'sudo wpa_cli scan_results',$scan_return );

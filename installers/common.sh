@@ -17,6 +17,16 @@ else
     php_package="php5-cgi" 
 fi 
 
+function update_system_packages() {
+    install_log "Updating sources"
+    sudo apt-get -y update || install_error "Unable to update package list"
+}
+
+function install_dependencies() {
+    install_log "Installing required packages"
+    sudo apt-get -y install lighttpd $php_package git hostapd dnsmasq || install_error "Unable to install dependencies"
+  }
+
 # Outputs a RaspAP Install log line
 function install_log() {
     echo -e "\033[1;32mRaspAP Install: $*\033[m"
@@ -55,23 +65,12 @@ function config_installation() {
     echo "Install directory: ${raspap_dir}"
     echo "Lighttpd directory: ${webroot_dir}"
     echo -n "Complete installation with these values? [y/N]: "
-    read answer
+    # read answer
+    answer="y"
     if [[ $answer != "y" ]]; then
         echo "Installation aborted."
         exit 0
     fi
-}
-
-# Runs a system software update to make sure we're using all fresh packages
-function update_system_packages() {
-    # OVERLOAD THIS
-    install_error "No function definition for update_system_packages"
-}
-
-# Installs additional dependencies using system package manager
-function install_dependencies() {
-    # OVERLOAD THIS
-    install_error "No function definition for install_dependencies"
 }
 
 # Enables PHP for lighttpd and restarts service for settings to take effect
@@ -123,9 +122,8 @@ function download_latest_files() {
         sudo mv $webroot_dir "$webroot_dir.`date +%F-%R`" || install_error "Unable to remove old webroot directory"
     fi
 
-    install_log "Cloning latest files from github"
-    git clone https://github.com/billz/raspap-webgui /tmp/raspap-webgui || install_error "Unable to download files from github"
-    sudo mv /tmp/raspap-webgui $webroot_dir || install_error "Unable to move raspap-webgui to web root"
+    install_log "Copying files to web server directory"
+    sudo cp -r ../ $webroot_dir || install_error "Unable to copy raspap-webgui to web root"
 }
 
 # Sets files ownership in web root directory
@@ -220,6 +218,7 @@ function patch_system_files() {
         '/sbin/ifup wlan0'
         '/bin/cat /etc/wpa_supplicant/wpa_supplicant.conf'
         '/bin/cp /tmp/wifidata /etc/wpa_supplicant/wpa_supplicant.conf'
+        '/sbin/iwlist wlan0 scan'
         '/sbin/wpa_cli scan_results'
         '/sbin/wpa_cli scan'
         '/sbin/wpa_cli reconfigure'
@@ -280,5 +279,5 @@ function install_raspap() {
     move_config_file
     default_configuration
     patch_system_files
-    install_complete
+    #install_complete
 }

@@ -65,8 +65,7 @@ function config_installation() {
     echo "Install directory: ${raspap_dir}"
     echo "Lighttpd directory: ${webroot_dir}"
     echo -n "Complete installation with these values? [y/N]: "
-    # read answer
-    answer="y"
+    read answer
     if [[ $answer != "y" ]]; then
         echo "Installation aborted."
         exit 0
@@ -78,8 +77,8 @@ function enable_php_lighttpd() {
     install_log "Enabling PHP for lighttpd"
 
     lighttpd-enable-mod fastcgi-php    
-    #service lighttpd force-reload
-    #/etc/init.d/lighttpd restart || install_error "Unable to restart lighttpd"
+    service lighttpd force-reload
+    etc/init.d/lighttpd restart || install_error "Unable to restart lighttpd"
 }
 
 # Verifies existence and permissions of RaspAP directory
@@ -268,8 +267,8 @@ function install_complete() {
 function install_raspap() {
     display_welcome
     config_installation
-    #update_system_packages
-    #install_dependencies
+    update_system_packages
+    install_dependencies
     enable_php_lighttpd
     create_raspap_directories
     check_for_old_configs
@@ -279,5 +278,5 @@ function install_raspap() {
     move_config_file
     default_configuration
     patch_system_files
-    #install_complete
+    install_complete
 }
